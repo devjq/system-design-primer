@@ -183,11 +183,11 @@ Two complementary tools: **fail-over** and **replication**.
 ### Availability in numbers ("nines")
 Availability is measured in **9s**. Memorize the shape:
 
-| Availability | Downtime/year | Downtime/day |
-|---|---|---|
-| 99.9% (three 9s) | ~8h 46m | ~1m 26s |
-| 99.99% (four 9s) | ~52m 36s | ~8.6s |
-| 99.999% (five 9s) | ~5m 15s | ~0.86s |
+| Availability      | Downtime/year | Downtime/day |
+| ----------------- | ------------- | ------------ |
+| 99.9% (three 9s)  | ~8h 46m       | ~1m 26s      |
+| 99.99% (four 9s)  | ~52m 36s      | ~8.6s        |
+| 99.999% (five 9s) | ~5m 15s       | ~0.86s       |
 
 **Composing availability:**
 - **In sequence** (request must pass through both): `A_total = A_foo × A_bar`. Two 99.9% components in series → **99.8%** (worse — chains hurt).
@@ -298,12 +298,12 @@ Data as **key-value**, **document**, **wide-column**, or **graph**. Denormalized
 
 **BASE** (vs ACID): **B**asically **A**vailable, **S**oft state, **E**ventual consistency — chooses availability over consistency.
 
-| Type | Abstraction | Use for | Examples |
-|---|---|---|---|
-| **Key-value** | hash table (O(1) r/w, memory/SSD) | caches, session data, simple/hot data | Redis, Memcached, DynamoDB |
-| **Document** | key-value where value is a document (JSON/XML) | flexible/occasionally-changing schemas, query by document fields | MongoDB, CouchDB, DynamoDB, Elasticsearch |
-| **Wide-column** | nested map `ColumnFamily<RowKey, Columns<ColKey, Value, Timestamp>>` | very large datasets, high write throughput, high availability | Cassandra, HBase, Bigtable |
-| **Graph** | graph (nodes + edges) | complex many-to-many relationships (social graphs, recommendations) | Neo4j, FlockDB |
+| Type            | Abstraction                                                          | Use for                                                             | Examples                                  |
+| --------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------- | ----------------------------------------- |
+| **Key-value**   | hash table (O(1) r/w, memory/SSD)                                    | caches, session data, simple/hot data                               | Redis, Memcached, DynamoDB                |
+| **Document**    | key-value where value is a document (JSON/XML)                       | flexible/occasionally-changing schemas, query by document fields    | MongoDB, CouchDB, DynamoDB, Elasticsearch |
+| **Wide-column** | nested map `ColumnFamily<RowKey, Columns<ColKey, Value, Timestamp>>` | very large datasets, high write throughput, high availability       | Cassandra, HBase, Bigtable                |
+| **Graph**       | graph (nodes + edges)                                                | complex many-to-many relationships (social graphs, recommendations) | Neo4j, FlockDB                            |
 
 ### SQL or NoSQL? (a decision checklist)
 
@@ -328,12 +328,12 @@ Caching is the **highest-leverage optimization** for read-heavy systems. It cuts
 
 **Cache update strategies (know all four + the trade-off):**
 
-| Strategy | How it works | Pros | Cons |
-|---|---|---|---|
-| **Cache-aside** (lazy loading) | App checks cache; on miss, reads DB, populates cache. | Only requested data cached; resilient to cache failure. | 3 trips on miss; data can go **stale** (fix with TTL); cold cache after node replace. |
-| **Write-through** | App writes to cache; cache **synchronously** writes DB. | Cache never stale; reads of just-written data fast. | Write latency higher; new nodes miss until data re-written; may cache unread data. |
-| **Write-behind (write-back)** | App writes to cache; cache writes DB **asynchronously**. | Fast writes. | **Data loss** if cache dies before flush; more complex. |
-| **Refresh-ahead** | Cache proactively refreshes popular entries before they expire. | Reduced latency if predictions are good. | Bad predictions waste work / hurt performance. |
+| Strategy                       | How it works                                                    | Pros                                                    | Cons                                                                                  |
+| ------------------------------ | --------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **Cache-aside** (lazy loading) | App checks cache; on miss, reads DB, populates cache.           | Only requested data cached; resilient to cache failure. | 3 trips on miss; data can go **stale** (fix with TTL); cold cache after node replace. |
+| **Write-through**              | App writes to cache; cache **synchronously** writes DB.         | Cache never stale; reads of just-written data fast.     | Write latency higher; new nodes miss until data re-written; may cache unread data.    |
+| **Write-behind (write-back)**  | App writes to cache; cache writes DB **asynchronously**.        | Fast writes.                                            | **Data loss** if cache dies before flush; more complex.                               |
+| **Refresh-ahead**              | Cache proactively refreshes popular entries before they expire. | Reduced latency if predictions are good.                | Bad predictions waste work / hurt performance.                                        |
 
 **The hard part — cache invalidation** ("one of the two hard problems in CS"). You must keep cache consistent with the source of truth; use **TTLs**, explicit invalidation, or write-through. LRU (least-recently-used) is the common eviction policy for full caches. Redis adds persistence and rich data structures (sorted sets, lists).
 
@@ -360,13 +360,13 @@ HTTP rides on **TCP/UDP** (transport), which ride on **IP** (network). Load bala
 ### HTTP
 A request/response protocol. Request = **verb + resource**. Self-contained, so it flows through proxies/caches/LBs.
 
-| Verb | Meaning | Idempotent | Safe | Cacheable |
-|---|---|---|---|---|
-| GET | read | ✅ | ✅ | ✅ |
-| POST | create / process | ❌ | ❌ | only w/ freshness info |
-| PUT | create/replace | ✅ | ❌ | ❌ |
-| PATCH | partial update | ❌ | ❌ | only w/ freshness info |
-| DELETE | delete | ✅ | ❌ | ❌ |
+| Verb   | Meaning          | Idempotent | Safe | Cacheable              |
+| ------ | ---------------- | ---------- | ---- | ---------------------- |
+| GET    | read             | ✅          | ✅    | ✅                      |
+| POST   | create / process | ❌          | ❌    | only w/ freshness info |
+| PUT    | create/replace   | ✅          | ❌    | ❌                      |
+| PATCH  | partial update   | ❌          | ❌    | only w/ freshness info |
+| DELETE | delete           | ✅          | ❌    | ❌                      |
 
 *Idempotent = calling it many times has the same effect as once (matters for safe retries).*
 
@@ -426,13 +426,13 @@ An index trades write/space overhead for faster reads. Two dominant families:
 
 Caps request rate to protect services, enforce quotas, and stop abuse.
 
-| Algorithm | How it works | Trade-off |
-|---|---|---|
-| **Token bucket** | Bucket holds ≤ *B* tokens, refills at *r*/sec; each request spends one. | Allows **bursts** up to B, cheap (count + timestamp). Most popular. |
-| **Leaky bucket** | Requests queue and drain at a fixed rate; overflow dropped. | **Smooths** output to constant rate, but adds queuing latency, no bursts. |
-| **Fixed window** | Count per fixed window (per minute), reset at boundary. | Trivial, but a **boundary spike** can allow 2× the limit across an edge. |
-| **Sliding window log** | Store every request timestamp; count those in the last window. | Exact, but memory-heavy. |
-| **Sliding window counter** | Weighted blend of current + previous window counts. | Approximates the log in O(1) memory, kills the boundary spike. |
+| Algorithm                  | How it works                                                            | Trade-off                                                                 |
+| -------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **Token bucket**           | Bucket holds ≤ *B* tokens, refills at *r*/sec; each request spends one. | Allows **bursts** up to B, cheap (count + timestamp). Most popular.       |
+| **Leaky bucket**           | Requests queue and drain at a fixed rate; overflow dropped.             | **Smooths** output to constant rate, but adds queuing latency, no bursts. |
+| **Fixed window**           | Count per fixed window (per minute), reset at boundary.                 | Trivial, but a **boundary spike** can allow 2× the limit across an edge.  |
+| **Sliding window log**     | Store every request timestamp; count those in the last window.          | Exact, but memory-heavy.                                                  |
+| **Sliding window counter** | Weighted blend of current + previous window counts.                     | Approximates the log in O(1) memory, kills the boundary spike.            |
 
 **Distributed (Redis):** centralize the counter so a fleet enforces a global limit. Use an atomic **Lua script** (or `INCR`+`EXPIRE`) for token bucket / fixed window, or a **sorted set** (`ZADD`/`ZREMRANGEBYSCORE`/`ZCARD`) for sliding-window-log. Return **`429 Too Many Requests`** with `Retry-After`. Watch the Redis hot-key/SPOF risk (shard by user).
 
@@ -442,19 +442,19 @@ Caps request rate to protect services, enforce quotas, and stop abuse.
 
 **REST vs gRPC vs GraphQL:**
 
-| | REST | gRPC | GraphQL |
-|---|---|---|---|
-| Style | Resources + HTTP verbs, JSON | RPC over HTTP/2 + Protobuf (binary) | Query language, single endpoint |
-| Streaming | No | Yes (uni + bidi) | Subscriptions (over WS) |
-| Best for | **Public APIs**, CRUD, caching, ubiquity | **Internal service-to-service**, low latency, polyglot | Aggregating resources for **diverse clients** (mobile/web) |
-| Weakness | Over/under-fetching, N round-trips | Weak in browsers, not human-readable | Caching harder, N+1 resolvers, query-cost risk |
+|           | REST                                     | gRPC                                                   | GraphQL                                                    |
+| --------- | ---------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------- |
+| Style     | Resources + HTTP verbs, JSON             | RPC over HTTP/2 + Protobuf (binary)                    | Query language, single endpoint                            |
+| Streaming | No                                       | Yes (uni + bidi)                                       | Subscriptions (over WS)                                    |
+| Best for  | **Public APIs**, CRUD, caching, ubiquity | **Internal service-to-service**, low latency, polyglot | Aggregating resources for **diverse clients** (mobile/web) |
+| Weakness  | Over/under-fetching, N round-trips       | Weak in browsers, not human-readable                   | Caching harder, N+1 resolvers, query-cost risk             |
 
 **Real-time / server push:**
 
-| | Long polling | SSE | WebSockets |
-|---|---|---|---|
-| Direction | Client re-requests | **Server → client** (one-way) | **Full-duplex** |
-| Best for | Legacy fallback | Feeds, notifications, live scores, **LLM token streaming** | Chat, gaming, collaborative editing, trading |
+|           | Long polling       | SSE                                                        | WebSockets                                   |
+| --------- | ------------------ | ---------------------------------------------------------- | -------------------------------------------- |
+| Direction | Client re-requests | **Server → client** (one-way)                              | **Full-duplex**                              |
+| Best for  | Legacy fallback    | Feeds, notifications, live scores, **LLM token streaming** | Chat, gaming, collaborative editing, trading |
 
 Rule: one-way push → **SSE** (simple, auto-reconnect, plain HTTP); two-way → **WebSockets**; long polling only as a fallback.
 
@@ -551,32 +551,32 @@ A **single point of failure** is any un-redundant component whose failure kills 
 
 **Powers of two** (for storage/addressing math):
 
-| Power | Approx | Bytes |
-|---|---|---|
-| 10 | 1 thousand | 1 KB |
-| 20 | 1 million | 1 MB |
-| 30 | 1 billion | 1 GB |
-| 40 | 1 trillion | 1 TB |
-| 50 | 1 quadrillion | 1 PB |
+| Power | Approx        | Bytes |
+| ----- | ------------- | ----- |
+| 10    | 1 thousand    | 1 KB  |
+| 20    | 1 million     | 1 MB  |
+| 30    | 1 billion     | 1 GB  |
+| 40    | 1 trillion    | 1 TB  |
+| 50    | 1 quadrillion | 1 PB  |
 
 **Latency numbers (Jeff Dean's list — memorize the *ratios*, not the digits):**
 
-| Operation | Latency | Intuition |
-|---|---|---|
-| L1 cache reference | 0.5 ns | — |
-| Branch mispredict | 5 ns | — |
-| L2 cache reference | 7 ns | 14× L1 |
-| Mutex lock/unlock | 25 ns | — |
-| Main memory reference | 100 ns | 200× L1 |
-| Compress 1 KB (Zippy) | 10 µs | — |
-| Send 1 KB over 1 Gbps | 10 µs | — |
-| **SSD random read** | 150 µs | ~1 GB/s SSD |
-| Read 1 MB seq from memory | 250 µs | — |
-| **Round trip in same DC** | 500 µs | — |
-| Read 1 MB seq from SSD | 1 ms | 4× memory |
-| **Disk seek** | 10 ms | 20× DC round trip |
-| Read 1 MB seq from disk | 30 ms | 120× memory |
-| **CA → Netherlands → CA** | 150 ms | speed of light tax |
+| Operation                 | Latency | Intuition          |
+| ------------------------- | ------- | ------------------ |
+| L1 cache reference        | 0.5 ns  | —                  |
+| Branch mispredict         | 5 ns    | —                  |
+| L2 cache reference        | 7 ns    | 14× L1             |
+| Mutex lock/unlock         | 25 ns   | —                  |
+| Main memory reference     | 100 ns  | 200× L1            |
+| Compress 1 KB (Zippy)     | 10 µs   | —                  |
+| Send 1 KB over 1 Gbps     | 10 µs   | —                  |
+| **SSD random read**       | 150 µs  | ~1 GB/s SSD        |
+| Read 1 MB seq from memory | 250 µs  | —                  |
+| **Round trip in same DC** | 500 µs  | —                  |
+| Read 1 MB seq from SSD    | 1 ms    | 4× memory          |
+| **Disk seek**             | 10 ms   | 20× DC round trip  |
+| Read 1 MB seq from disk   | 30 ms   | 120× memory        |
+| **CA → Netherlands → CA** | 150 ms  | speed of light tax |
 
 **Derived rules of thumb:** memory is ~100,000× faster than a disk seek · same-DC round trip ~0.5 ms (≈ 2,000/sec) · cross-continent RTT ~150 ms (≈ 6–7/sec) · read seq: disk ~30 MB/s, 1 Gbps net ~100 MB/s, SSD ~1 GB/s, memory ~4 GB/s.
 
@@ -648,14 +648,14 @@ This one *is* the [§2 framework](#2-the-interview-framework) applied iterativel
 
 Some interviews (especially at Amazon) include an OO/class-design round. The repo has 6 solved as Jupyter notebooks. Approach: clarify use cases → identify the core **classes/objects** and their relationships → define methods and interfaces → apply design patterns (strategy, factory, observer, state) where they fit → discuss extensibility.
 
-| Problem | Notebook | The core modeling challenge |
-|---|---|---|
-| Hash map | [hash_map.ipynb](solutions/object_oriented_design/hash_table/hash_map.ipynb) | Buckets + collision handling (chaining). |
-| **LRU cache** | [lru_cache.ipynb](solutions/object_oriented_design/lru_cache/lru_cache.ipynb) | Doubly-linked list + hash map for O(1) — same trick as practice problem #6. |
-| Call center | [call_center.ipynb](solutions/object_oriented_design/call_center/call_center.ipynb) | Escalation hierarchy (operator → supervisor → director); dispatch. |
-| Deck of cards | [deck_of_cards.ipynb](solutions/object_oriented_design/deck_of_cards/deck_of_cards.ipynb) | Enums, inheritance, shuffle; extend to blackjack. |
-| **Parking lot** | [parking_lot.ipynb](solutions/object_oriented_design/parking_lot/parking_lot.ipynb) | Vehicle/spot type hierarchies + fitting rules — the classic OO question. |
-| Online chat | [online_chat.ipynb](solutions/object_oriented_design/online_chat/online_chat.ipynb) | Users, groups, messages; add/remove; send. |
+| Problem         | Notebook                                                                                  | The core modeling challenge                                                 |
+| --------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Hash map        | [hash_map.ipynb](solutions/object_oriented_design/hash_table/hash_map.ipynb)              | Buckets + collision handling (chaining).                                    |
+| **LRU cache**   | [lru_cache.ipynb](solutions/object_oriented_design/lru_cache/lru_cache.ipynb)             | Doubly-linked list + hash map for O(1) — same trick as practice problem #6. |
+| Call center     | [call_center.ipynb](solutions/object_oriented_design/call_center/call_center.ipynb)       | Escalation hierarchy (operator → supervisor → director); dispatch.          |
+| Deck of cards   | [deck_of_cards.ipynb](solutions/object_oriented_design/deck_of_cards/deck_of_cards.ipynb) | Enums, inheritance, shuffle; extend to blackjack.                           |
+| **Parking lot** | [parking_lot.ipynb](solutions/object_oriented_design/parking_lot/parking_lot.ipynb)       | Vehicle/spot type hierarchies + fitting rules — the classic OO question.    |
+| Online chat     | [online_chat.ipynb](solutions/object_oriented_design/online_chat/online_chat.ipynb)       | Users, groups, messages; add/remove; send.                                  |
 
 Anki decks for spaced repetition are in [`resources/flash_cards/`](resources/flash_cards/).
 
@@ -684,18 +684,18 @@ Anki decks for spaced repetition are in [`resources/flash_cards/`](resources/fla
 - "That's a single point of failure; I'd add a standby / run it in parallel."
 
 **When X, reach for Y:**
-| Symptom | Reach for |
-|---|---|
-| Read-heavy, hot keys | Cache (+ CDN), read replicas |
-| Write-heavy ingest | LSM store (Cassandra), sharding, queue + batch |
-| Expensive joins | Denormalization, materialized views |
-| Slow inline work | Async queue + workers |
-| Node churn reshuffles data | Consistent hashing |
-| Duplicate messages | Idempotency keys / dedup |
-| One slow dep stalls everything | Timeout + circuit breaker + bulkhead |
-| Traffic spikes | Autoscaling (stateless tier) + back pressure |
-| Need global agreement/config | Raft store (etcd/ZooKeeper) |
-| Abuse / quota enforcement | Token bucket / sliding-window (Redis) |
+| Symptom                        | Reach for                                      |
+| ------------------------------ | ---------------------------------------------- |
+| Read-heavy, hot keys           | Cache (+ CDN), read replicas                   |
+| Write-heavy ingest             | LSM store (Cassandra), sharding, queue + batch |
+| Expensive joins                | Denormalization, materialized views            |
+| Slow inline work               | Async queue + workers                          |
+| Node churn reshuffles data     | Consistent hashing                             |
+| Duplicate messages             | Idempotency keys / dedup                       |
+| One slow dep stalls everything | Timeout + circuit breaker + bulkhead           |
+| Traffic spikes                 | Autoscaling (stateless tier) + back pressure   |
+| Need global agreement/config   | Raft store (etcd/ZooKeeper)                    |
+| Abuse / quota enforcement      | Token bucket / sliding-window (Redis)          |
 
 ## 19. Self-test flashcard prompts
 

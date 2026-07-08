@@ -49,18 +49,18 @@ Memory ref **100 ns** · SSD read **150 µs** · same-DC round trip **0.5 ms** �
 - **Observability** — logs (why) · metrics (that + alerts) · traces (where). SLI < SLO (error budget) < SLA.
 
 ## When X → reach for Y
-| Symptom | Reach for |
-|---|---|
-| Read-heavy / hot keys | Cache + CDN, read replicas |
-| Write-heavy ingest | LSM store, sharding, queue + batch |
-| Expensive joins | Denormalize, materialized views |
-| Slow inline work | Async queue + workers |
-| Node churn reshuffles data | Consistent hashing |
-| Duplicate messages | Idempotency keys / dedup |
-| One slow dep stalls all | Timeout + circuit breaker + bulkhead |
-| Traffic spikes | Autoscaling (stateless) + back pressure |
-| Global agreement/config | Raft store (etcd/ZooKeeper) |
-| Abuse / quotas | Token bucket (Redis) |
+| Symptom                    | Reach for                               |
+| -------------------------- | --------------------------------------- |
+| Read-heavy / hot keys      | Cache + CDN, read replicas              |
+| Write-heavy ingest         | LSM store, sharding, queue + batch      |
+| Expensive joins            | Denormalize, materialized views         |
+| Slow inline work           | Async queue + workers                   |
+| Node churn reshuffles data | Consistent hashing                      |
+| Duplicate messages         | Idempotency keys / dedup                |
+| One slow dep stalls all    | Timeout + circuit breaker + bulkhead    |
+| Traffic spikes             | Autoscaling (stateless) + back pressure |
+| Global agreement/config    | Raft store (etcd/ZooKeeper)             |
+| Abuse / quotas             | Token bucket (Redis)                    |
 
 ## Trade-off phrases to say out loud
 - "Read-heavy (100:1), so I'll optimize reads with caching + replicas."
