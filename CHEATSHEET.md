@@ -32,6 +32,8 @@
 ## Key numbers
 Memory ref **100 ns** · SSD read **150 µs** · same-DC round trip **0.5 ms** · disk seek **10 ms** · CA↔Netherlands **150 ms**. Memory ≈ 100,000× faster than disk seek. Seq read: disk 30 MB/s · 1 Gbps net 100 MB/s · SSD 1 GB/s · memory 4 GB/s. 2^10≈1K, 2^20≈1M, 2^30≈1B, 2^40≈1T. **1M/day ≈ 12 QPS.**
 
+**Capacity (one node, ±1 order of magnitude — for "one box vs many"):** SQL writes **~1K/s** (>5K → shard/queue) · SQL reads ~10K/s (replicas) · Redis/Memcached ~100K ops/s · Cassandra ~10K writes/s **per node** (scales linearly) · Kafka 100K–1M msgs/s · app server 1K–10K QPS. **Memorize: single SQL primary ≈ 10³ writes/s** — the Mint trigger for sharding.
+
 ## Protocols
 - **TCP** = reliable, ordered, slower (web/DB/SSH). **UDP** = lossy, fast, broadcast (VoIP/video/games).
 - **REST** = public/CRUD, cacheable · **gRPC** = internal service-to-service, HTTP/2+Protobuf · **GraphQL** = client picks fields (mobile).

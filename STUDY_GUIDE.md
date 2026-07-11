@@ -115,6 +115,17 @@ Interviewers often ask you to size the system by hand. You only need a few refer
 5. **Bandwidth** = QPS × bytes/response.
 6. Round aggressively with [powers of two](#numbers-every-engineer-should-know). Precision is not the point — the *order of magnitude* drives the design.
 
+> **What to compute for THIS problem (don't compute everything).** Estimation always lives at the *end of Step 1 (Scope)* — never its own step: **use cases → state assumptions → calculate usage.** The *method* above is identical every time; what changes is *which output you spotlight*, chosen by working backward from "what decision am I about to make?" Compute a number only if it changes a design choice, then **stop at one order of magnitude** — check it against the [capacity numbers](#numbers-every-engineer-should-know) (e.g. 2,000 writes/s vs. a single SQL master's ~1,000) to trigger the next move.
+>
+> | Problem       | The number that matters           | What it decides                           |
+> | ------------- | --------------------------------- | ----------------------------------------- |
+> | Mint          | 2,000 **writes**/s, write-heavy   | one SQL master can't cope → shard / queue |
+> | Twitter       | 600k timeline inserts/s (fan-out) | the celebrity / hybrid problem            |
+> | URL shortener | 6 billion keys                    | base62 key length (6 vs 7 chars)          |
+> | Sales rank    | hourly batch, 40k reads/s         | MapReduce offline, tiny serve table       |
+>
+> Mint skips bandwidth/CDN math (not media-heavy → wouldn't change anything); Twitter leans on it. That selectivity *is* the skill — it's not inconsistency between the worked examples.
+
 *(Two fully worked examples — a Twitter-scale service and a URL shortener — are in [§17 Deeper Topics / estimation](#17-deeper-topics) once integrated below, and in the [practice problems](#practice-problems). Learn the method, not the numbers.)*
 
 ---
@@ -579,6 +590,19 @@ A **single point of failure** is any un-redundant component whose failure kills 
 | **CA → Netherlands → CA** | 150 ms  | speed of light tax |
 
 **Derived rules of thumb:** memory is ~100,000× faster than a disk seek · same-DC round trip ~0.5 ms (≈ 2,000/sec) · cross-continent RTT ~150 ms (≈ 6–7/sec) · read seq: disk ~30 MB/s, 1 Gbps net ~100 MB/s, SSD ~1 GB/s, memory ~4 GB/s.
+
+**Capacity numbers ("how much can one box take?").** These are *order-of-magnitude interview heuristics* — good to ±1 order of magnitude only; real numbers swing 10× with hardware, row size, indexes, and query shape. Use them exactly like the latency list: to justify **"one box vs. many,"** never as precise SLAs.
+
+| Component                     | Comfortable single node        | "Getting nervous" → scale out               |
+| ----------------------------- | ------------------------------ | ------------------------------------------- |
+| **SQL primary (writes)**      | ~**1,000 writes/s** (10³)      | **~5,000+/s** → shard / queue / denormalize |
+| SQL reads (with replicas)     | ~10,000 reads/s (10⁴)          | 10⁴–10⁵ → add read replicas, cache          |
+| **Redis / Memcached**         | ~**100,000 ops/s** (10⁵)       | approaching 10⁶ → shard the cache           |
+| NoSQL write node (Cassandra)  | ~10,000 writes/s **per node**  | scales ~linearly — just add nodes           |
+| Kafka                         | ~100k–1M msgs/s                | rarely the bottleneck                       |
+| App / web server (stateless)  | ~1,000–10,000 QPS              | just add boxes behind an LB                 |
+
+**The one to memorize:** *a single SQL primary tops out around 10³ writes/s.* This is the number the [Mint solution](#practice-problems) leans on — 2,000 writes/s is "tough for a single master" → reach for federation / sharding / NoSQL. Notice every entry is a clean power of ten: memorize the **exponent, not the digits** (same discipline as the latency ratios). **How to use it:** chain estimate → threshold → design move — *"I estimated ~2,000 writes/s; a single SQL master handles ~1,000, so I'm over budget → I need sharding or a write queue."* If your estimate lands within ~2× of a threshold, say *"borderline, I'd load-test it"* rather than pretending the number is exact.
 
 **Availability nines:** 99.9% ≈ 8.7 h/yr · 99.99% ≈ 52 min/yr · 99.999% ≈ 5 min/yr. In **series** multiply availabilities (worse); in **parallel** `1−(1−a)(1−b)` (better).
 
