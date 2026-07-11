@@ -311,12 +311,12 @@ Data as **key-value**, **document**, **wide-column**, or **graph**. Denormalized
 
 **BASE** (vs ACID): **B**asically **A**vailable, **S**oft state, **E**ventual consistency — chooses availability over consistency.
 
-| Type            | Abstraction                                                          | Use for                                                             | Examples                                  |
-| --------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------- | ----------------------------------------- |
-| **Key-value**   | hash table (O(1) r/w, memory/SSD)                                    | caches, session data, simple/hot data                               | Redis, Memcached, DynamoDB                |
-| **Document**    | key-value where value is a document (JSON/XML)                       | flexible/occasionally-changing schemas, query by document fields    | MongoDB, CouchDB, DynamoDB, Elasticsearch |
-| **Wide-column** | nested map `ColumnFamily<RowKey, Columns<ColKey, Value, Timestamp>>` | very large datasets, high write throughput, high availability       | Cassandra, HBase, Bigtable                |
-| **Graph**       | graph (nodes + edges)                                                | complex many-to-many relationships (social graphs, recommendations) | Neo4j, FlockDB                            |
+| Type | Abstraction | Use for | Examples |
+| --- | --- | --- | --- |
+| **Key-value** | hash table (O(1) r/w, memory/SSD) | caches, session data, simple/hot data | Redis, Memcached, DynamoDB |
+| **Document** | key-value where value is a document (JSON/XML) | flexible/occasionally-changing schemas, query by document fields | MongoDB, CouchDB, DynamoDB, Elasticsearch |
+| **Wide-column** | nested map `ColumnFamily<RowKey, Columns<ColKey, Value, Timestamp>>` | very large datasets, high write throughput, high availability | Cassandra, HBase, Bigtable |
+| **Graph** | graph (nodes + edges) | complex many-to-many relationships (social graphs, recommendations) | Neo4j, FlockDB |
 
 ### SQL or NoSQL? (a decision checklist)
 
@@ -341,12 +341,12 @@ Caching is the **highest-leverage optimization** for read-heavy systems. It cuts
 
 **Cache update strategies (know all four + the trade-off):**
 
-| Strategy                       | How it works                                                    | Pros                                                    | Cons                                                                                  |
-| ------------------------------ | --------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| **Cache-aside** (lazy loading) | App checks cache; on miss, reads DB, populates cache.           | Only requested data cached; resilient to cache failure. | 3 trips on miss; data can go **stale** (fix with TTL); cold cache after node replace. |
-| **Write-through**              | App writes to cache; cache **synchronously** writes DB.         | Cache never stale; reads of just-written data fast.     | Write latency higher; new nodes miss until data re-written; may cache unread data.    |
-| **Write-behind (write-back)**  | App writes to cache; cache writes DB **asynchronously**.        | Fast writes.                                            | **Data loss** if cache dies before flush; more complex.                               |
-| **Refresh-ahead**              | Cache proactively refreshes popular entries before they expire. | Reduced latency if predictions are good.                | Bad predictions waste work / hurt performance.                                        |
+| Strategy | How it works | Pros | Cons |
+| --- | --- | --- | --- |
+| **Cache-aside** (lazy loading) | App checks cache; on miss, reads DB, populates cache. | Only requested data cached; resilient to cache failure. | 3 trips on miss; data can go **stale** (fix with TTL); cold cache after node replace. |
+| **Write-through** | App writes to cache; cache **synchronously** writes DB. | Cache never stale; reads of just-written data fast. | Write latency higher; new nodes miss until data re-written; may cache unread data. |
+| **Write-behind (write-back)** | App writes to cache; cache writes DB **asynchronously**. | Fast writes. | **Data loss** if cache dies before flush; more complex. |
+| **Refresh-ahead** | Cache proactively refreshes popular entries before they expire. | Reduced latency if predictions are good. | Bad predictions waste work / hurt performance. |
 
 **The hard part — cache invalidation** ("one of the two hard problems in CS"). You must keep cache consistent with the source of truth; use **TTLs**, explicit invalidation, or write-through. LRU (least-recently-used) is the common eviction policy for full caches. Redis adds persistence and rich data structures (sorted sets, lists).
 
@@ -439,13 +439,13 @@ An index trades write/space overhead for faster reads. Two dominant families:
 
 Caps request rate to protect services, enforce quotas, and stop abuse.
 
-| Algorithm                  | How it works                                                            | Trade-off                                                                 |
-| -------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| **Token bucket**           | Bucket holds ≤ *B* tokens, refills at *r*/sec; each request spends one. | Allows **bursts** up to B, cheap (count + timestamp). Most popular.       |
-| **Leaky bucket**           | Requests queue and drain at a fixed rate; overflow dropped.             | **Smooths** output to constant rate, but adds queuing latency, no bursts. |
-| **Fixed window**           | Count per fixed window (per minute), reset at boundary.                 | Trivial, but a **boundary spike** can allow 2× the limit across an edge.  |
-| **Sliding window log**     | Store every request timestamp; count those in the last window.          | Exact, but memory-heavy.                                                  |
-| **Sliding window counter** | Weighted blend of current + previous window counts.                     | Approximates the log in O(1) memory, kills the boundary spike.            |
+| Algorithm | How it works | Trade-off |
+| --- | --- | --- |
+| **Token bucket** | Bucket holds ≤ *B* tokens, refills at *r*/sec; each request spends one. | Allows **bursts** up to B, cheap (count + timestamp). Most popular. |
+| **Leaky bucket** | Requests queue and drain at a fixed rate; overflow dropped. | **Smooths** output to constant rate, but adds queuing latency, no bursts. |
+| **Fixed window** | Count per fixed window (per minute), reset at boundary. | Trivial, but a **boundary spike** can allow 2× the limit across an edge. |
+| **Sliding window log** | Store every request timestamp; count those in the last window. | Exact, but memory-heavy. |
+| **Sliding window counter** | Weighted blend of current + previous window counts. | Approximates the log in O(1) memory, kills the boundary spike. |
 
 **Distributed (Redis):** centralize the counter so a fleet enforces a global limit. Use an atomic **Lua script** (or `INCR`+`EXPIRE`) for token bucket / fixed window, or a **sorted set** (`ZADD`/`ZREMRANGEBYSCORE`/`ZCARD`) for sliding-window-log. Return **`429 Too Many Requests`** with `Retry-After`. Watch the Redis hot-key/SPOF risk (shard by user).
 
@@ -455,19 +455,19 @@ Caps request rate to protect services, enforce quotas, and stop abuse.
 
 **REST vs gRPC vs GraphQL:**
 
-|           | REST                                     | gRPC                                                   | GraphQL                                                    |
-| --------- | ---------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------- |
-| Style     | Resources + HTTP verbs, JSON             | RPC over HTTP/2 + Protobuf (binary)                    | Query language, single endpoint                            |
-| Streaming | No                                       | Yes (uni + bidi)                                       | Subscriptions (over WS)                                    |
-| Best for  | **Public APIs**, CRUD, caching, ubiquity | **Internal service-to-service**, low latency, polyglot | Aggregating resources for **diverse clients** (mobile/web) |
-| Weakness  | Over/under-fetching, N round-trips       | Weak in browsers, not human-readable                   | Caching harder, N+1 resolvers, query-cost risk             |
+| | REST | gRPC | GraphQL |
+| --- | --- | --- | --- |
+| Style | Resources + HTTP verbs, JSON | RPC over HTTP/2 + Protobuf (binary) | Query language, single endpoint |
+| Streaming | No | Yes (uni + bidi) | Subscriptions (over WS) |
+| Best for | **Public APIs**, CRUD, caching, ubiquity | **Internal service-to-service**, low latency, polyglot | Aggregating resources for **diverse clients** (mobile/web) |
+| Weakness | Over/under-fetching, N round-trips | Weak in browsers, not human-readable | Caching harder, N+1 resolvers, query-cost risk |
 
 **Real-time / server push:**
 
-|           | Long polling       | SSE                                                        | WebSockets                                   |
-| --------- | ------------------ | ---------------------------------------------------------- | -------------------------------------------- |
-| Direction | Client re-requests | **Server → client** (one-way)                              | **Full-duplex**                              |
-| Best for  | Legacy fallback    | Feeds, notifications, live scores, **LLM token streaming** | Chat, gaming, collaborative editing, trading |
+| | Long polling | SSE | WebSockets |
+| --- | --- | --- | --- |
+| Direction | Client re-requests | **Server → client** (one-way) | **Full-duplex** |
+| Best for | Legacy fallback | Feeds, notifications, live scores, **LLM token streaming** | Chat, gaming, collaborative editing, trading |
 
 Rule: one-way push → **SSE** (simple, auto-reconnect, plain HTTP); two-way → **WebSockets**; long polling only as a fallback.
 
@@ -674,14 +674,14 @@ This one *is* the [§2 framework](#2-the-interview-framework) applied iterativel
 
 Some interviews (especially at Amazon) include an OO/class-design round. The repo has 6 solved as Jupyter notebooks. Approach: clarify use cases → identify the core **classes/objects** and their relationships → define methods and interfaces → apply design patterns (strategy, factory, observer, state) where they fit → discuss extensibility.
 
-| Problem         | Notebook                                                                                  | The core modeling challenge                                                 |
-| --------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Hash map        | [hash_map.ipynb](solutions/object_oriented_design/hash_table/hash_map.ipynb)              | Buckets + collision handling (chaining).                                    |
-| **LRU cache**   | [lru_cache.ipynb](solutions/object_oriented_design/lru_cache/lru_cache.ipynb)             | Doubly-linked list + hash map for O(1) — same trick as practice problem #6. |
-| Call center     | [call_center.ipynb](solutions/object_oriented_design/call_center/call_center.ipynb)       | Escalation hierarchy (operator → supervisor → director); dispatch.          |
-| Deck of cards   | [deck_of_cards.ipynb](solutions/object_oriented_design/deck_of_cards/deck_of_cards.ipynb) | Enums, inheritance, shuffle; extend to blackjack.                           |
-| **Parking lot** | [parking_lot.ipynb](solutions/object_oriented_design/parking_lot/parking_lot.ipynb)       | Vehicle/spot type hierarchies + fitting rules — the classic OO question.    |
-| Online chat     | [online_chat.ipynb](solutions/object_oriented_design/online_chat/online_chat.ipynb)       | Users, groups, messages; add/remove; send.                                  |
+| Problem | Notebook | The core modeling challenge |
+| --- | --- | --- |
+| Hash map | [hash_map.ipynb](solutions/object_oriented_design/hash_table/hash_map.ipynb) | Buckets + collision handling (chaining). |
+| **LRU cache** | [lru_cache.ipynb](solutions/object_oriented_design/lru_cache/lru_cache.ipynb) | Doubly-linked list + hash map for O(1) — same trick as practice problem #6. |
+| Call center | [call_center.ipynb](solutions/object_oriented_design/call_center/call_center.ipynb) | Escalation hierarchy (operator → supervisor → director); dispatch. |
+| Deck of cards | [deck_of_cards.ipynb](solutions/object_oriented_design/deck_of_cards/deck_of_cards.ipynb) | Enums, inheritance, shuffle; extend to blackjack. |
+| **Parking lot** | [parking_lot.ipynb](solutions/object_oriented_design/parking_lot/parking_lot.ipynb) | Vehicle/spot type hierarchies + fitting rules — the classic OO question. |
+| Online chat | [online_chat.ipynb](solutions/object_oriented_design/online_chat/online_chat.ipynb) | Users, groups, messages; add/remove; send. |
 
 Anki decks for spaced repetition are in [`resources/flash_cards/`](resources/flash_cards/).
 
