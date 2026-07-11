@@ -8,7 +8,7 @@
 2. **Estimate** — period→seconds (day ≈ 10⁵ s); avg QPS = count/86,400; peak ≈ 2×; reads = writes × ratio; storage = count×bytes×retention; bandwidth = QPS×payload.
 3. **API** — key endpoints (verb, path, params, response).
 4. **Data model** — SQL vs NoSQL *and say why*.
-5. **Diagram** — Client → DNS → CDN → LB → Web → App/Services → Cache ⇄ DB; slow work → Queue → Workers.
+5. **Diagram** — draw only what makes the use cases *work*: Client → Web/App tier → DB, + anything **core** (e.g. Queue → Workers when async is the point). *Defer scale infra (LB, CDN, cache, replicas) to the scale step (6).* Test: is it here to **work** or to **scale**?
 6. **Deep-dive** the core trick; **identify bottlenecks**; **scale each tier**; **name every trade-off**.
 
 ## Six core trade-offs

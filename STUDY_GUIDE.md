@@ -82,7 +82,9 @@ Gather requirements. **Do not skip this.** Ask:
 Write the agreed scope down. This is your contract for the rest of the interview.
 
 ### Step 2 — High-level design
-Sketch the major components and how requests flow between them. Draw boxes: client → DNS → CDN → load balancer → web tier → app/service tier → cache → database → queue/workers. Justify each box. Keep it simple first — you'll scale it in Step 4.
+Sketch only the components needed to make the use cases *work* end-to-end — typically `client → web/app tier → database` — plus anything **core to the design itself** (e.g. a queue + workers when async processing is the whole point, as in Mint's transaction extraction). Draw boxes and show how requests flow between them; justify each box.
+
+**Leave scaling infrastructure for Step 4.** The test for what goes here vs. Step 4 is *functionality vs. scale*: is a component present so the system **works**, or so it **holds up under load**? Load balancer, CDN, cache, and read replicas are almost always there to *scale* → defer them to Step 4, where you add each under a profiled bottleneck. (The full `client → DNS → CDN → load balancer → … → cache → database → queue` chain in [Part III](#part-iii--the-building-blocks) is a *menu* of the request path, not what you draw on the first pass.)
 
 ### Step 3 — Design the core components
 Go deep on the pieces that matter for *this* problem. Typically:
