@@ -5,6 +5,13 @@
 > **How to use this file:** Read it top-to-bottom once for breadth. Then use the [Cheat Sheet](#18-one-page-cheat-sheet) and [Flashcard Prompts](#19-self-test-flashcard-prompts) for review. Every section links back to the deeper source material in this repo (`README.md`, `solutions/…`) so you can drill down when a topic interests you.
 >
 > **The one idea to internalize:** *Everything is a trade-off.* There is no "correct" architecture — only choices with costs. Interviewers are testing whether you can reason about those costs out loud.
+>
+> **Where to practise what this file teaches:** the companion repo
+> `devjq/system-design-study` *(private — link works for the author only)* holds
+> the applied half: 24 designs as full six-phase talk tracks with whiteboard
+> companions, a rendered diagram per topic, and a four-week roadmap. This file is
+> the **reference**; that repo is the **rehearsal**. Read a section here, then go
+> talk the matching design through out loud.
 
 ---
 
